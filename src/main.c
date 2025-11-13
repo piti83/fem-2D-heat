@@ -1,4 +1,5 @@
 #include "constants.h"
+#include "h_matrix.h"
 #include "integrals.h"
 #include "io.h"
 #include "mesh.h"
@@ -19,9 +20,15 @@ int main() {
 
 #ifndef DEBUG
   ExportJacobianData(&grid, &uni_vals);
-#endif // DEBUG
+#endif  // DEBUG
+
+  GlobHMatrix h_matrix;
+  InitHMatrix(&h_matrix, &data);
+  CalcGlobalHMatrix(&h_matrix, &grid);
+  PrintGlobalH(&h_matrix);
 
   GridCleanup(&grid);
+  HMatrixCleanup(&h_matrix);
 
   return 0;
 }

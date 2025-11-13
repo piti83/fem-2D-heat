@@ -2,7 +2,6 @@
 #define SRC_MESH_H_
 
 #include <stdint.h>
-
 #include <constants.h>
 
 typedef struct {

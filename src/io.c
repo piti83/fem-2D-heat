@@ -82,6 +82,8 @@ void ReadFile(const char* path, GlobalData* glob_data, Grid* grid) {
            &grid->elements[i].nodes[3]);
   }
 
+  fclose(f_ptr);
+
   glob_data->nip = NIP;
   grid->jacobians_calculated = 0;
 }
@@ -129,17 +131,17 @@ void ExportJacobianData(const Grid* grid, const UniversalVals* uni_vals) {
           "==================== OBLICZONE STAŁE ====================\n\n");
   fprintf(fptr, "dN/dKsi\n");
   for (int i = 0; i < 4; ++i) {
-    fprintf(fptr, "\t%12.8f %12.8f %12.8f %12.8f\n", 
+    fprintf(fptr, "\t%12.8f %12.8f %12.8f %12.8f\n",
             uni_vals->dn_dksi[i][0],
-            uni_vals->dn_dksi[i][1], 
+            uni_vals->dn_dksi[i][1],
             uni_vals->dn_dksi[i][2],
             uni_vals->dn_dksi[i][3]);
   }
   fprintf(fptr, "dN/dEta\n");
   for (int i = 0; i < 4; ++i) {
-    fprintf(fptr, "\t%12.8f %12.8f %12.8f %12.8f\n", 
+    fprintf(fptr, "\t%12.8f %12.8f %12.8f %12.8f\n",
             uni_vals->dn_deta[i][0],
-            uni_vals->dn_deta[i][1], 
+            uni_vals->dn_deta[i][1],
             uni_vals->dn_deta[i][2],
             uni_vals->dn_deta[i][3]);
   }
@@ -179,4 +181,26 @@ void ExportJacobianData(const Grid* grid, const UniversalVals* uni_vals) {
   }
   fprintf(fptr, "\n");
   fclose(fptr);
+}
+
+void PrintGlobalH(const GlobHMatrix* h_matrix) {
+  printf("\n\n");
+  printf("                                                  H MATRIX\n");
+  printf("+");
+  for (int i = 0; i < h_matrix->n * 7 - 1; ++i) {
+    printf("-");
+  }
+  printf("+\n");
+  for (int i = 0; i < h_matrix->n; ++i) {
+    printf("|");
+    for (int j = 0; j < h_matrix->n; ++j) {
+      printf("%6.3lf|", h_matrix->mat[i][j]);
+    }
+    printf("\n");
+  }
+  printf("+");
+  for (int i = 0; i < h_matrix->n * 7 - 1; ++i) {
+    printf("-");
+  }
+  printf("+\n");
 }

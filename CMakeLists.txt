@@ -12,6 +12,7 @@ set(SRC
     src/mesh.c
     src/integrals.c
     src/constants.c
+    src/h_matrix.c
 )
 
 add_executable(mes ${SRC})

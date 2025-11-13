@@ -127,7 +127,7 @@ void CalcHMatrix(Grid* grid, GlobalData* glob_data) {
           c_h[i][j] +=
               glob_data->conductivity *
               (c_j->dN_dx[i] * c_j->dN_dx[j] + c_j->dN_dy[i] * c_j->dN_dy[j]) *
-              grid->elements[e].jacobian->det_j;
+              c_j->det_j;
         }
       }
     }

@@ -46,8 +46,8 @@ void ReadFile(const char* path, GlobalData* glob_data, Grid* grid) {
   grid->n_nodes = glob_data->n_nodes;
   grid->n_elements = glob_data->n_elements;
 
-  grid->nodes = (Node*)malloc(grid->n_nodes * sizeof(Node));
-  grid->elements = (Element*)malloc(grid->n_elements * sizeof(Element));
+  grid->nodes = (Node*)calloc(grid->n_nodes, sizeof(Node));
+  grid->elements = (Element*)calloc(grid->n_elements, sizeof(Element));
 
   if (!grid->nodes) {
     printf("Failed to allocate memory for %d nodes.", grid->n_nodes);

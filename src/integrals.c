@@ -1,7 +1,8 @@
+#include "integrals.h"
+
 #include <stdio.h>
 
 #include "constants.h"
-#include "integrals.h"
 
 double Gauss1D2P(double (*f)(double)) {
   return kWeightsN2[0] * f(kPointsN2[0]) + kWeightsN2[1] * f(kPointsN2[1]);
@@ -137,6 +138,33 @@ void CalcHMatrix(Grid* grid, GlobalData* glob_data) {
 void CalcHbcMatrix(Grid* grid, UniversalVals* uni_vals, GlobalData* glob_data) {
   for (int i = 0; i < grid->n_elements; ++i) {
     Element* e = &grid->elements[i];
-    
+
+    Node side1[2] = {grid->nodes[e->nodes[0] - 1],
+                     grid->nodes[e->nodes[1] - 1]};
+
+    Node side2[2] = {grid->nodes[e->nodes[1] - 1],
+                     grid->nodes[e->nodes[2] - 1]};
+
+    Node side3[2] = {grid->nodes[e->nodes[2] - 1],
+                     grid->nodes[e->nodes[3] - 1]};
+
+    Node side4[2] = {grid->nodes[e->nodes[3] - 1],
+                     grid->nodes[e->nodes[0] - 1]};
+
+#ifdef DEBUG
+    printf("\n\n                 SIDES (e%d)\n", i+1);
+        printf("===============================================\n");
+            printf("{[%lf, %lf], [%lf, %lf]}\n", side1[0].x, side1[0].y,
+                   side1[1].x, side1[1].y);
+    printf("{[%lf, %lf], [%lf, %lf]}\n", side2[0].x, side2[0].y, side2[1].x,
+           side2[1].y);
+    printf("{[%lf, %lf], [%lf, %lf]}\n", side3[0].x, side3[0].y, side3[1].x,
+           side3[1].y);
+    printf("{[%lf, %lf], [%lf, %lf]}\n", side4[0].x, side4[0].y, side4[1].x,
+           side4[1].y);
+    printf("===============================================\n");
+#endif
+
+
   }
 }

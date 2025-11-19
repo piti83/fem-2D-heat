@@ -21,6 +21,8 @@ target_include_directories(mes PRIVATE
     ${CMAKE_SOURCE_DIR}/src
 )
 
+target_link_libraries(mes PRIVATE m)
+
 set_target_properties(mes PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin
 )

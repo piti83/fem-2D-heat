@@ -1,8 +1,25 @@
 #include "integrals.h"
 
+#include <math.h>
 #include <stdio.h>
 
 #include "constants.h"
+
+double N1(double ksi, double eta) {
+  return 0.25 * (1 - ksi) * (1 - eta);
+}
+
+double N2(double ksi, double eta) {
+  return 0.25 * (1 + ksi) * (1 - eta);
+}
+
+double N3(double ksi, double eta) {
+  return 0.25 * (1 + ksi) * (1 + eta);
+}
+
+double N4(double ksi, double eta) {
+  return 0.25 * (1 - ksi) * (1 + eta);
+}
 
 double Gauss1D2P(double (*f)(double)) {
   return kWeightsN2[0] * f(kPointsN2[0]) + kWeightsN2[1] * f(kPointsN2[1]);
@@ -139,32 +156,74 @@ void CalcHbcMatrix(Grid* grid, UniversalVals* uni_vals, GlobalData* glob_data) {
   for (int i = 0; i < grid->n_elements; ++i) {
     Element* e = &grid->elements[i];
 
-    Node side1[2] = {grid->nodes[e->nodes[0] - 1],
-                     grid->nodes[e->nodes[1] - 1]};
+    for (int hbc_i = 0; hbc_i < 4; ++hbc_i) {
+      for (int hbc_j = 0; hbc_j < 4; ++hbc_j) {
+        e->hbc_matrix[hbc_i][hbc_j] = 0.0;
+      }
+    }
 
-    Node side2[2] = {grid->nodes[e->nodes[1] - 1],
-                     grid->nodes[e->nodes[2] - 1]};
+    int id1 = e->nodes[0] - 1;
+    int id2 = e->nodes[1] - 1;
+    int id3 = e->nodes[2] - 1;
+    int id4 = e->nodes[3] - 1;
 
-    Node side3[2] = {grid->nodes[e->nodes[2] - 1],
-                     grid->nodes[e->nodes[3] - 1]};
+    int side_nodes[4][2] = {{id1, id2}, {id2, id3}, {id3, id4}, {id4, id1}};
 
-    Node side4[2] = {grid->nodes[e->nodes[3] - 1],
-                     grid->nodes[e->nodes[0] - 1]};
+    for (int side = 0; side < 4; ++side) {
+      Node* n_a = &grid->nodes[side_nodes[side][0]];
+      Node* n_b = &grid->nodes[side_nodes[side][1]];
 
-#ifdef DEBUG
-    printf("\n\n                 SIDES (e%d)\n", i+1);
-        printf("===============================================\n");
-            printf("{[%lf, %lf], [%lf, %lf]}\n", side1[0].x, side1[0].y,
-                   side1[1].x, side1[1].y);
-    printf("{[%lf, %lf], [%lf, %lf]}\n", side2[0].x, side2[0].y, side2[1].x,
-           side2[1].y);
-    printf("{[%lf, %lf], [%lf, %lf]}\n", side3[0].x, side3[0].y, side3[1].x,
-           side3[1].y);
-    printf("{[%lf, %lf], [%lf, %lf]}\n", side4[0].x, side4[0].y, side4[1].x,
-           side4[1].y);
-    printf("===============================================\n");
-#endif
+      if (n_a->bc == false || n_b->bc == false) {
+        continue;
+      }
 
+      double det_j_side = sqrt((n_b->x - n_a->x) * (n_b->x - n_a->x) +
+                               (n_b->y - n_a->y) * (n_b->y - n_a->y)) / 2;
 
+      for (int ip = 0; ip < 2; ++ip) {
+        double ip_val = kPointsN2[ip];
+        double weight = kWeightsN2[ip];
+
+        double ksi, eta;
+
+        switch (side) {
+          case 0:
+            ksi = ip_val;
+            eta = -1.0;
+            break;
+          case 1:
+            ksi = 1.0;
+            eta = ip_val;
+            break;
+          case 2:
+            ksi = ip_val;
+            eta = 1.0;
+            break;
+          case 3:
+            ksi = -1.0;
+            eta = ip_val;
+            break;
+        }
+
+        double N[4];
+
+        N[0] = N1(ksi, eta);
+        N[1] = N2(ksi, eta);
+        N[2] = N3(ksi, eta);
+        N[3] = N4(ksi, eta);
+
+        for (int i_surface = 0; i_surface < 4; ++i_surface) {
+          e->surface[side].n[ip][i_surface] = N[i_surface];
+        }
+
+        double coefficient = glob_data->alfa * weight * det_j_side;
+
+        for (int i_hbc = 0; i_hbc < 4; ++i_hbc) {
+          for (int j_hbc = 0; j_hbc < 4; ++j_hbc) {
+            e->hbc_matrix[i_hbc][j_hbc] += coefficient * N[i_hbc] * N[j_hbc];
+          }
+        }
+      }
+    }
   }
 }

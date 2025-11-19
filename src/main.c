@@ -31,9 +31,12 @@ int main() {
 #endif  // DEBUG
 
   CalcHbcMatrix(&grid, &uni_vals, &data);
+#ifdef DEBUG
+  ExportHbcMatrices(&grid);
+#endif
 
-  GridCleanup(&grid);
   HMatrixCleanup(&h_matrix);
+  GridCleanup(&grid);
 
   return 0;
 }

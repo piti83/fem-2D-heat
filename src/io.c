@@ -98,7 +98,7 @@ void ReadFile(const char* path, GlobalData* glob_data, Grid* grid) {
   char* token = strtok(line_buffer, ",");
   while (token) {
     int id = atoi(token);
-    grid->nodes[id-1].bc = true;
+    grid->nodes[id - 1].bc = true;
     token = strtok(NULL, ",");
   }
 
@@ -146,7 +146,7 @@ void PrintInfo(const GlobalData* glob_data, const Grid* grid) {
   printf("+-----------------------------------------+\n");
   for (int i = 0; i < grid->n_nodes; ++i) {
     if (grid->nodes[i].bc) {
-      printf("%d ", i+1);
+      printf("%d ", i + 1);
     }
   }
   printf("\n");
@@ -229,4 +229,28 @@ void PrintGlobalH(const GlobHMatrix* h_matrix) {
     printf("-");
   }
   printf("+\n");
+}
+
+void ExportHbcMatrices(const Grid* grid) {
+  FILE* fptr;
+  fptr = fopen("out/hbc.txt", "w");
+
+  fprintf(fptr,
+          "========================= CALCULATED HBC MATRICES "
+          "=========================\n\n");
+
+  for (int i = 0; i < grid->n_elements; ++i) {
+    Element* e = &grid->elements[i];
+    fprintf(fptr, "\tElement %d:\n\n", i + 1);
+    for (int hbc_i = 0; hbc_i < 4; ++hbc_i) {
+      fprintf(fptr, "\t\t");
+      for (int hbc_j = 0; hbc_j < 4; ++hbc_j) {
+        fprintf(fptr, "%6.3lf   ", e->hbc_matrix[hbc_i][hbc_j]);
+      }
+      fprintf(fptr, "\n");
+    }
+    fprintf(fptr, "\n");
+  }
+
+  fclose(fptr);
 }

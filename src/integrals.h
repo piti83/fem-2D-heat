@@ -3,6 +3,11 @@
 
 #include <mesh.h>
 
+double N1(double ksi, double eta);
+double N2(double ksi, double eta);
+double N3(double ksi, double eta);
+double N4(double ksi, double eta);
+
 double Gauss1D2P(double (*f)(double));
 double Gauss1D3P(double (*f)(double));
 double Gauss2D2P(double (*f)(double, double));

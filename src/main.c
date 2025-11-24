@@ -1,4 +1,5 @@
 #include "constants.h"
+#include "equation.h"
 #include "h_matrix.h"
 #include "integrals.h"
 #include "io.h"
@@ -35,6 +36,14 @@ int main() {
   ExportHbcMatrices(&grid);
 #endif
 
+  CalcPVector(&grid, &uni_vals, &data);
+
+  Equation eq;
+  InitEquation(&data, &eq);
+
+  SolveEquation(&data, &eq);
+
+  EquationCleanup(&eq);
   HMatrixCleanup(&h_matrix);
   GridCleanup(&grid);
 

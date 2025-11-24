@@ -17,5 +17,6 @@ void CalcUniversalVals(UniversalVals* uni_vals);
 void CalcJacobians(Grid* grid, UniversalVals* uni_vals);
 void CalcHMatrix(Grid* grid, GlobalData* glob_data);
 void CalcHbcMatrix(Grid* grid, UniversalVals* uni_vals, GlobalData* glob_data);
+void CalcPVector(Grid* grid, UniversalVals* uni_vals, GlobalData* glob_data);
 
 #endif // SRC_INTEGRALS_C_

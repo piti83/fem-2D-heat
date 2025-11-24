@@ -29,6 +29,7 @@ typedef struct {
   double h_matrix[4][4];
   double hbc_matrix[4][4];
   Surface surface[4];
+  double p_vector[4];
 } Element;
 
 typedef struct {

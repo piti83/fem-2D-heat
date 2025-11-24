@@ -13,6 +13,7 @@ set(SRC
     src/integrals.c
     src/constants.c
     src/h_matrix.c
+    src/equation.c
 )
 
 add_executable(mes ${SRC})

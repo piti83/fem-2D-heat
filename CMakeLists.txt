@@ -12,7 +12,6 @@ set(SRC
     src/mesh.c
     src/integrals.c
     src/constants.c
-    src/h_matrix.c
     src/equation.c
 )
 

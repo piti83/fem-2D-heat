@@ -209,26 +209,26 @@ void ExportJacobianData(const Grid* grid, const UniversalVals* uni_vals) {
   fclose(fptr);
 }
 
-void PrintGlobalH(const GlobHMatrix* h_matrix) {
-  printf("\n\n");
-  printf("                                                  H MATRIX\n");
-  printf("+");
-  for (int i = 0; i < h_matrix->n * 7 - 1; ++i) {
-    printf("-");
-  }
-  printf("+\n");
-  for (int i = 0; i < h_matrix->n; ++i) {
-    printf("|");
-    for (int j = 0; j < h_matrix->n; ++j) {
-      printf("%6.3lf|", h_matrix->mat[i][j]);
+void ExportGlobalH(const Equation* equation) {
+  FILE* fptr = fopen("out/global_h_matrix.txt", "w");
+  fprintf(fptr, "[GLOBAL H MATRIX]\n\n");
+  for (int i = 0; i < equation->nn; ++i) {
+    for (int j = 0; j < equation->nn; ++j) {
+      fprintf(fptr, "%6.2lf  ", equation->hg[i][j]);
     }
-    printf("\n");
+    fprintf(fptr, "\n");
   }
-  printf("+");
-  for (int i = 0; i < h_matrix->n * 7 - 1; ++i) {
-    printf("-");
+  fclose(fptr);
+}
+
+void ExportGlobalP(const Equation* equation) {
+  FILE* fptr = fopen("out/global_p_vector.txt", "w");
+  fprintf(fptr, "[GLOBAL P VECTOR]\n\n");
+  for (int i = 0; i < equation->nn; ++i) {
+    fprintf(fptr, "%6.2lf  ", equation->pg[i]);
   }
-  printf("+\n");
+  fprintf(fptr, "\n");
+  fclose(fptr);
 }
 
 void ExportHbcMatrices(const Grid* grid) {

@@ -15,14 +15,27 @@ void InitEquation(const GlobalData* glob_data, Equation* equation) {
   equation->pg = (double*)calloc(equation->nn, sizeof(double));
 }
 
-void AgregatePVectors(const GlobalData* glob_data, const Grid* grid,
-                      Equation* equation) {
+void AggregatePVector(const GlobalData* glob_data, const Grid* grid, Equation* equation) {
 
   for (int i = 0; i < glob_data->n_elements; ++i) {
     Element* e = &grid->elements[i];
     for (int local_id = 0; local_id < 4; ++local_id) {
       int global_id = e->nodes[local_id] - 1;
       equation->pg[global_id] += e->p_vector[local_id];
+    }
+  }
+}
+
+void AggregateHMatrix(const GlobalData *glob_data, const Grid *grid, Equation *equation) {
+  for (int i = 0; i < glob_data->n_elements; ++i) {
+    Element* e = &grid->elements[i];
+    for (int row = 0; row < 4; ++row) {
+      int global_row = e->nodes[row] - 1;
+      for (int col = 0; col < 4; ++col) {
+        int global_col = e->nodes[col] - 1;
+        double value = e->h_matrix[row][col] + e->hbc_matrix[row][col];
+        equation->hg[global_row][global_col] += value;
+      }
     }
   }
 }

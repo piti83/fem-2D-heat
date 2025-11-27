@@ -224,7 +224,7 @@ void CalcHbcMatrix(Grid* grid, UniversalVals* uni_vals, GlobalData* glob_data) {
 void CalcPVector(Grid* grid, UniversalVals* uni_vals, GlobalData* glob_data) {
   for (int i = 0; i < grid->n_elements; ++i) {
     for (int j = 0; j < 4; ++j) {
-      grid->elements[j].p_vector[i] = 0;
+      grid->elements[i].p_vector[j] = 0;
     }
   }
 
@@ -290,3 +290,4 @@ void CalcPVector(Grid* grid, UniversalVals* uni_vals, GlobalData* glob_data) {
       }
     }
   }
+}

@@ -79,8 +79,6 @@ void ReadFile(const char* path, GlobalData* glob_data, Grid* grid) {
         }
     }
 
-    glob_data->nip = NIP;
-
     fclose(f_ptr);
 }
 
@@ -97,7 +95,8 @@ void PrintInfo(const GlobalData* glob_data, const Grid* grid) {
   printf("- Specific Heat        :  %f\n", glob_data->spec_heat);
   printf("- Nodes                :  %d\n", glob_data->n_nodes);
   printf("- Elements             :  %d\n", glob_data->n_elements);
-  printf("- NIP                  :  %d\n\n", glob_data->nip);
+  printf("- NIP (Elements)       :  %d\n", glob_data->nip_elem);
+  printf("- NIP (Surface)        :  %d\n\n", glob_data->nip_bc);
 
   printf("===========================================\n\n");
 

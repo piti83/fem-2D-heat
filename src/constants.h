@@ -17,8 +17,9 @@ typedef struct {
   double x, y;
 } Point;
 
-extern Point kPointsN2D2[];
-
 void InitConstants();
+
+double* GetPoints(int n);
+double* GetWeights(int n);
 
 #endif // SRC_CONSTANTS_H_

@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "constants.h"
+#include "mesh.h"
 
 double N1(double ksi, double eta) { return 0.25 * (1 - ksi) * (1 - eta); }
 
@@ -17,104 +18,86 @@ double Gauss1D2P(double (*f)(double)) {
   return kWeightsN2[0] * f(kPointsN2[0]) + kWeightsN2[1] * f(kPointsN2[1]);
 }
 
-double Gauss1D3P(double (*f)(double)) {
-  double result = 0.0;
-  for (int i = 0; i < 3; ++i) {
-    result += kWeightsN3[i] * f(kPointsN3[i]);
-  }
-  return result;
-}
+void CalcUniversalVals(UniversalVals* uni_vals, int nip) {
+  double* points = GetPoints(nip);
 
-double Gauss2D2P(double (*f)(double, double)) {
-  double result = 0.0;
-  for (int i = 0; i < 2; ++i) {
-    for (int j = 0; j < 2; ++j) {
-      result += kWeightsN2[i] * kWeightsN2[j] * f(kPointsN2[i], kPointsN2[j]);
+  if (!points) {
+    printf("Error. Unsupported NIP: %d\n", nip);
+    return;
+  }
+
+  int idx = 0;
+
+  for (int i = 0; i < nip; ++i) {
+    for (int j = 0; j < nip; ++j) {
+      double eta = points[i];
+      double ksi = points[j];
+
+      uni_vals->dn_dksi[idx][0] = -0.25 * (1 - eta);
+      uni_vals->dn_dksi[idx][1] = 0.25 * (1 - eta);
+      uni_vals->dn_dksi[idx][2] = 0.25 * (1 + eta);
+      uni_vals->dn_dksi[idx][3] = -0.25 * (1 + eta);
+
+      uni_vals->dn_deta[idx][0] = -0.25 * (1 - ksi);
+      uni_vals->dn_deta[idx][1] = -0.25 * (1 + ksi);
+      uni_vals->dn_deta[idx][2] = 0.25 * (1 + ksi);
+      uni_vals->dn_deta[idx][3] = 0.25 * (1 - ksi);
+
+      idx++;
     }
   }
-  return result;
 }
 
-double Gauss2D3P(double (*f)(double, double)) {
-  double result = 0.0;
-  for (int i = 0; i < 3; ++i) {
-    for (int j = 0; j < 3; ++j) {
-      result += kWeightsN3[i] * kWeightsN3[j] * f(kPointsN3[i], kPointsN3[j]);
-    }
-  }
-  return result;
-}
+void CalcJacobians(Grid* grid, UniversalVals* uni_vals, GlobalData* glob_data) {
+  int nip = glob_data->nip_elem;
+  double* weights = GetWeights(nip);
 
-void CalcUniversalVals(UniversalVals* uni_vals) {
-  for (int i = 0; i < 4; ++i) {
-    uni_vals->dn_dksi[i][0] = -0.25 * (1 - kPointsN2D2[i].y);
-    uni_vals->dn_dksi[i][1] = 0.25 * (1 - kPointsN2D2[i].y);
-    uni_vals->dn_dksi[i][2] = 0.25 * (1 + kPointsN2D2[i].y);
-    uni_vals->dn_dksi[i][3] = -0.25 * (1 + kPointsN2D2[i].y);
-  }
-  for (int i = 0; i < 4; ++i) {
-    uni_vals->dn_deta[i][0] = -0.25 * (1 - kPointsN2D2[i].x);
-    uni_vals->dn_deta[i][1] = -0.25 * (1 + kPointsN2D2[i].x);
-    uni_vals->dn_deta[i][2] = 0.25 * (1 + kPointsN2D2[i].x);
-    uni_vals->dn_deta[i][3] = 0.25 * (1 - kPointsN2D2[i].x);
-  }
-}
-
-void CalcJacobians(Grid* grid, UniversalVals* uni_vals) {
   for (int i = 0; i < grid->n_elements; ++i) {
-    for (int ip = 0; ip < 4; ++ip) {
-      int id1 = grid->elements[i].nodes[0] - 1;
-      int id2 = grid->elements[i].nodes[1] - 1;
-      int id3 = grid->elements[i].nodes[2] - 1;
-      int id4 = grid->elements[i].nodes[3] - 1;
+    int idx = 0;
+    for (int y = 0; y < nip; ++y) {
+      for (int x = 0; x < nip; ++x) {
+        int ip = idx;
+        grid->elements[i].jacobian[ip].weight = weights[y] * weights[x];
 
-      double dx_dksi = uni_vals->dn_dksi[ip][0] * grid->nodes[id1].x +
-                       uni_vals->dn_dksi[ip][1] * grid->nodes[id2].x +
-                       uni_vals->dn_dksi[ip][2] * grid->nodes[id3].x +
-                       uni_vals->dn_dksi[ip][3] * grid->nodes[id4].x;
+        double dx_dksi = 0.0, dx_deta = 0.0, dy_dksi = 0.0, dy_deta = 0.0;
 
-      double dx_deta = uni_vals->dn_deta[ip][0] * grid->nodes[id1].x +
-                       uni_vals->dn_deta[ip][1] * grid->nodes[id2].x +
-                       uni_vals->dn_deta[ip][2] * grid->nodes[id3].x +
-                       uni_vals->dn_deta[ip][3] * grid->nodes[id4].x;
+        for (int k = 0; k < 4; ++k) {
+          double x_node = grid->nodes[grid->elements[i].nodes[k] - 1].x;
+          double y_node = grid->nodes[grid->elements[i].nodes[k] - 1].y;
 
-      double dy_dksi = uni_vals->dn_dksi[ip][0] * grid->nodes[id1].y +
-                       uni_vals->dn_dksi[ip][1] * grid->nodes[id2].y +
-                       uni_vals->dn_dksi[ip][2] * grid->nodes[id3].y +
-                       uni_vals->dn_dksi[ip][3] * grid->nodes[id4].y;
+          dx_dksi += uni_vals->dn_dksi[ip][k] * x_node;
+          dx_deta += uni_vals->dn_deta[ip][k] * x_node;
+          dy_dksi += uni_vals->dn_dksi[ip][k] * y_node;
+          dy_deta += uni_vals->dn_deta[ip][k] * y_node;
+        }
 
-      double dy_deta = uni_vals->dn_deta[ip][0] * grid->nodes[id1].y +
-                       uni_vals->dn_deta[ip][1] * grid->nodes[id2].y +
-                       uni_vals->dn_deta[ip][2] * grid->nodes[id3].y +
-                       uni_vals->dn_deta[ip][3] * grid->nodes[id4].y;
+        grid->elements[i].jacobian[ip].j[0][0] = dx_dksi;
+        grid->elements[i].jacobian[ip].j[0][1] = dy_dksi;
+        grid->elements[i].jacobian[ip].j[1][0] = dx_deta;
+        grid->elements[i].jacobian[ip].j[1][1] = dy_deta;
 
-      grid->elements[i].jacobian[ip].j[0][0] = dx_dksi;
-      grid->elements[i].jacobian[ip].j[0][1] = dy_dksi;
-      grid->elements[i].jacobian[ip].j[1][0] = dx_deta;
-      grid->elements[i].jacobian[ip].j[1][1] = dy_deta;
+        double det_j = (dx_dksi * dy_deta) - (dy_dksi * dx_deta);
+        grid->elements[i].jacobian[ip].det_j = det_j;
 
-      double det_j = (dx_dksi * dy_deta) - (dy_dksi * dx_deta);
-      grid->elements[i].jacobian[ip].det_j = det_j;
+        double j1_00 = dy_deta / det_j;
+        double j1_01 = -dy_dksi / det_j;
+        double j1_10 = -dx_deta / det_j;
+        double j1_11 = dx_dksi / det_j;
 
-      double j1_00 = dy_deta / det_j;
-      double j1_01 = -dy_dksi / det_j;
-      double j1_10 = -dx_deta / det_j;
-      double j1_11 = dx_dksi / det_j;
+        grid->elements[i].jacobian[ip].j1[0][0] = j1_00;
+        grid->elements[i].jacobian[ip].j1[0][1] = j1_01;
+        grid->elements[i].jacobian[ip].j1[1][0] = j1_10;
+        grid->elements[i].jacobian[ip].j1[1][1] = j1_11;
 
-      grid->elements[i].jacobian[ip].j1[0][0] = j1_00;
-      grid->elements[i].jacobian[ip].j1[0][1] = j1_01;
-      grid->elements[i].jacobian[ip].j1[1][0] = j1_10;
-      grid->elements[i].jacobian[ip].j1[1][1] = j1_11;
+        for (int k = 0; k < 4; ++k) {
+          double dN_dksi_k = uni_vals->dn_dksi[ip][k];
+          double dN_deta_k = uni_vals->dn_deta[ip][k];
 
-      for (int k = 0; k < 4; ++k) {
-        double dN_dksi_k = uni_vals->dn_dksi[ip][k];
-        double dN_deta_k = uni_vals->dn_deta[ip][k];
+          grid->elements[i].jacobian[ip].dN_dx[k] = j1_00 * dN_dksi_k + j1_01 * dN_deta_k;
 
-        grid->elements[i].jacobian[ip].dN_dx[k] =
-            j1_00 * dN_dksi_k + j1_01 * dN_deta_k;
-
-        grid->elements[i].jacobian[ip].dN_dy[k] =
-            j1_10 * dN_dksi_k + j1_11 * dN_deta_k;
+          grid->elements[i].jacobian[ip].dN_dy[k] = j1_10 * dN_dksi_k + j1_11 * dN_deta_k;
+        }
+        idx++;
       }
     }
   }
@@ -127,17 +110,22 @@ void CalcHMatrix(Grid* grid, GlobalData* glob_data) {
     return;
   }
 
+  int nip = glob_data->nip_elem;
+  int total_points = nip * nip;
+
   for (int e = 0; e < grid->n_elements; ++e) {
-    for (int ip = 0; ip < 4; ++ip) {
+    for (int i = 0; i < 4; ++i)
+      for (int j = 0; j < 4; ++j) grid->elements[e].h_matrix[i][j] = 0.0;
+
+    for (int ip = 0; ip < total_points; ++ip) {
       Jacobian* c_j = &grid->elements[e].jacobian[ip];
       double (*c_h)[4] = grid->elements[e].h_matrix;
 
+      double factor = glob_data->conductivity * c_j->det_j * c_j->weight;
+
       for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
-          c_h[i][j] +=
-              glob_data->conductivity *
-              (c_j->dN_dx[i] * c_j->dN_dx[j] + c_j->dN_dy[i] * c_j->dN_dy[j]) *
-              c_j->det_j;
+          c_h[i][j] += factor * (c_j->dN_dx[i] * c_j->dN_dx[j] + c_j->dN_dy[i] * c_j->dN_dy[j]);
         }
       }
     }
@@ -145,6 +133,10 @@ void CalcHMatrix(Grid* grid, GlobalData* glob_data) {
 }
 
 void CalcHbcMatrix(Grid* grid, UniversalVals* uni_vals, GlobalData* glob_data) {
+  int nip = glob_data->nip_bc;
+  double* points = GetPoints(nip);
+  double* weights = GetWeights(nip);
+
   for (int i = 0; i < grid->n_elements; ++i) {
     Element* e = &grid->elements[i];
 
@@ -169,13 +161,11 @@ void CalcHbcMatrix(Grid* grid, UniversalVals* uni_vals, GlobalData* glob_data) {
         continue;
       }
 
-      double det_j_side = sqrt((n_b->x - n_a->x) * (n_b->x - n_a->x) +
-                               (n_b->y - n_a->y) * (n_b->y - n_a->y)) /
-                          2;
+      double det_j_side = sqrt(pow(n_b->x - n_a->x, 2) + pow(n_b->y - n_a->y, 2)) / 2.0;
 
-      for (int ip = 0; ip < 2; ++ip) {
-        double ip_val = kPointsN2[ip];
-        double weight = kWeightsN2[ip];
+      for (int ip = 0; ip < nip; ++ip) {
+        double ip_val = points[ip];
+        double weight = weights[ip];
 
         double ksi, eta;
 
@@ -189,24 +179,24 @@ void CalcHbcMatrix(Grid* grid, UniversalVals* uni_vals, GlobalData* glob_data) {
             eta = ip_val;
             break;
           case 2:
-            ksi = ip_val;
+            ksi = -ip_val;
             eta = 1.0;
-            break;
+            break;  // Uwaga: kierunek? Dla symetrii Gaussa ok
           case 3:
             ksi = -1.0;
-            eta = ip_val;
+            eta = -ip_val;
             break;
         }
 
         double N[4];
-
         N[0] = N1(ksi, eta);
         N[1] = N2(ksi, eta);
         N[2] = N3(ksi, eta);
         N[3] = N4(ksi, eta);
 
+        // Zapisz funkcje kształtu dla ewentualnego debugowania (jeśli Surface obsłuży >2 pkt)
         for (int i_surface = 0; i_surface < 4; ++i_surface) {
-          e->surface[side].n[ip][i_surface] = N[i_surface];
+          if (ip < MAX_NIP_1D) e->surface[side].n[ip][i_surface] = N[i_surface];
         }
 
         double coefficient = glob_data->alfa * weight * det_j_side;
@@ -222,6 +212,10 @@ void CalcHbcMatrix(Grid* grid, UniversalVals* uni_vals, GlobalData* glob_data) {
 }
 
 void CalcPVector(Grid* grid, UniversalVals* uni_vals, GlobalData* glob_data) {
+  int nip = glob_data->nip_bc;
+  double* points = GetPoints(nip);
+  double* weights = GetWeights(nip);
+
   for (int i = 0; i < grid->n_elements; ++i) {
     for (int j = 0; j < 4; ++j) {
       grid->elements[i].p_vector[j] = 0;
@@ -246,13 +240,12 @@ void CalcPVector(Grid* grid, UniversalVals* uni_vals, GlobalData* glob_data) {
         continue;
       }
 
-      double length = sqrt((n_b->x - n_a->x) * (n_b->x - n_a->x) +
-                           (n_b->y - n_a->y) * (n_b->y - n_a->y));
+      double length = sqrt(pow(n_b->x - n_a->x, 2) + pow(n_b->y - n_a->y, 2));
       double det_j_side = length / 2.0;
 
-      for (int ip = 0; ip < 2; ++ip) {
-        double weight = kWeightsN2[ip];
-        double point = kPointsN2[ip];
+      for (int ip = 0; ip < nip; ++ip) {
+        double weight = weights[ip];
+        double point = points[ip];
 
         double ksi = 0.0;
         double eta = 0.0;

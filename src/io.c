@@ -280,3 +280,13 @@ void ExportCMatrices(const Grid* grid) {
 
   fclose(fptr);
 }
+
+void ExportTemperatureVector(const Equation* equation) {
+  FILE* fptr = fopen("out/temperature_vector.txt", "w");
+  fprintf(fptr, "[TEMPERATURE VECTOR]\n\n");
+  for (int i = 0; i < equation->nn; ++i) {
+    fprintf(fptr, "%6.2lf  ", equation->t[i]);
+  }
+  fprintf(fptr, "\n");
+  fclose(fptr);
+}

@@ -86,6 +86,12 @@ void Run(int argc, char** argv) {
   ExportGlobalC(&eq);
 #endif
 
+  SolveSteadyState(&data, &eq);
+
+#ifdef DEBUG
+  ExportTemperatureVector(&eq);
+#endif
+
   EquationCleanup(&eq);
   GridCleanup(&grid);
 }

@@ -18,4 +18,6 @@ void ExportHbcMatrices(const Grid* grid);
 void ExportPVectors(const Grid* grid);
 void ExportCMatrices(const Grid* grid);
 
+void ExportTemperatureVector(const Equation* equation);
+
 #endif  // SRC_INPUT_H_

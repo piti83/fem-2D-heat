@@ -46,10 +46,19 @@ void AggregateHMatrix(const GlobalData *glob_data, const Grid *grid, Equation *e
 }
 
 void AggregateCMatrix(const GlobalData* glob_data, const Grid* grid, Equation* equation) {
-
+  for (int i = 0; i < glob_data->n_elements; ++i) {
+    Element* e = &grid->elements[i];
+    for (int row = 0; row < 4; ++row) {
+      int global_row = e->nodes[row] - 1;
+      for (int col = 0; col < 4; ++col) {
+        int global_col = e->nodes[col] - 1;
+        equation->c[global_row][global_col] += e->c_matrix[row][col];
+      }
+    }
+  }
 }
 
-void SolveEquation(const GlobalData* glob_data, Equation* equation) {
+void SolveEquationHTP0(const GlobalData* glob_data, Equation* equation) {
 
 }
 

@@ -1,7 +1,6 @@
 #ifndef SRC_MESH_H_
 #define SRC_MESH_H_
 
-#include <stdint.h>
 #include <constants.h>
 #include <stdbool.h>
 
@@ -42,7 +41,7 @@ typedef struct {
   unsigned int n_elements;
   Node* nodes;
   Element* elements;
-  int16_t jacobians_calculated;
+  int jacobians_calculated;
 } Grid;
 
 typedef struct {

@@ -2,7 +2,6 @@
 
 #include <math.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include "io.h"
 
 void InitEquation(const GlobalData* glob_data, Equation* equation) {

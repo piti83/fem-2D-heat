@@ -181,7 +181,7 @@ void CalcHbcMatrices(Grid* grid, UniversalVals* uni_vals, GlobalData* glob_data)
           case 2:
             ksi = -ip_val;
             eta = 1.0;
-            break;  // Uwaga: kierunek? Dla symetrii Gaussa ok
+            break;  
           case 3:
             ksi = -1.0;
             eta = -ip_val;
@@ -194,7 +194,6 @@ void CalcHbcMatrices(Grid* grid, UniversalVals* uni_vals, GlobalData* glob_data)
         N[2] = N3(ksi, eta);
         N[3] = N4(ksi, eta);
 
-        // Zapisz funkcje kształtu dla ewentualnego debugowania (jeśli Surface obsłuży >2 pkt)
         for (int i_surface = 0; i_surface < 4; ++i_surface) {
           if (ip < MAX_NIP_1D) e->surface[side].n[ip][i_surface] = N[i_surface];
         }

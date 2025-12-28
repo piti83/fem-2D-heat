@@ -1,9 +1,9 @@
-#include "io.h"
-
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "io.h"
 
 void ReadFile(const char* path, GlobalData* glob_data, Grid* grid) {
   FILE* f_ptr = fopen(path, "r");
@@ -308,4 +308,16 @@ void ExportTempSnapshot(const GlobalData* data, const Equation* equation, double
   }
   fprintf(fptr, "\n");
   fclose(fptr);
+}
+
+void InitPrintMinMax() {
+  printf("\n\n+--------------------------------------+\n");
+}
+
+void PrintMinMax(double current_time, double min_t, double max_t) {
+  printf("| %-10.2lf | %-10.2lf | %-10.2lf |\n", current_time, min_t, max_t);
+}
+
+void EndPrintMinMax() {
+  printf("+--------------------------------------+\n");
 }

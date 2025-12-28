@@ -40,7 +40,7 @@ void Run(int argc, char** argv) {
 
   ParseCommandLine(&data, argc, argv);
 
-  ReadFile("run/test2.txt", &data, &grid);
+  ReadFile("run/test.txt", &data, &grid);
 
 #ifdef DEBUG
   PrintInfo(&data, &grid);

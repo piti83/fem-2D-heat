@@ -159,13 +159,12 @@ void SolveNonStationary(const GlobalData* glob_data, Equation* equation) {
   }
 
   double current_time = 0.0;
-  int step = 0;
 
   InitNonStationaryExport(glob_data);
+  InitPrintMinMax();
 
   while (current_time < total_time) {
     current_time += dt;
-    step++;
 
     for (int i = 0; i < nn; ++i) {
       double c_dt_t0 = 0.0;
@@ -183,9 +182,11 @@ void SolveNonStationary(const GlobalData* glob_data, Equation* equation) {
       if (equation->t[i] < min_t) min_t = equation->t[i];
       if (equation->t[i] > max_t) max_t = equation->t[i];
     }
+    PrintMinMax(current_time, min_t, max_t);
     ExportTempSnapshot(glob_data, equation, current_time);
   }
 
+  EndPrintMinMax();
   free(p_static);
 }
 

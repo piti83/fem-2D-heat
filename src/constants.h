@@ -1,8 +1,6 @@
 #ifndef SRC_CONSTANTS_H_
 #define SRC_CONSTANTS_H_
 
-#define NIP 4
-
 extern double kPointsN1[];
 extern double kPointsN2[];
 extern double kPointsN3[];

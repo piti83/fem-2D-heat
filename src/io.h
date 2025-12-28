@@ -23,4 +23,8 @@ void ExportTemperatureVector(const Equation* equation);
 void InitNonStationaryExport(const GlobalData* data);
 void ExportTempSnapshot(const GlobalData* data, const Equation* equation, double current_time);
 
+void InitPrintMinMax();
+void PrintMinMax(double current_time, double min_t, double max_t);
+void EndPrintMinMax();
+
 #endif  // SRC_INPUT_H_

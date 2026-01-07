@@ -1,9 +1,8 @@
-#include "integrals.h"
-
 #include <math.h>
 #include <stdio.h>
 
 #include "constants.h"
+#include "integrals.h"
 #include "mesh.h"
 
 double N1(double ksi, double eta) { return 0.25 * (1 - ksi) * (1 - eta); }
@@ -181,7 +180,7 @@ void CalcHbcMatrices(Grid* grid, UniversalVals* uni_vals, GlobalData* glob_data)
           case 2:
             ksi = -ip_val;
             eta = 1.0;
-            break;  
+            break;
           case 3:
             ksi = -1.0;
             eta = -ip_val;

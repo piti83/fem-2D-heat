@@ -1,7 +1,7 @@
-#include "constants.h"
-
 #include <math.h>
 #include <stdlib.h>
+
+#include "constants.h"
 
 double kPointsN1[1];
 double kPointsN2[2];
